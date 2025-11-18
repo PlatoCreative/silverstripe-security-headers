@@ -10,6 +10,7 @@ use SilverStripe\ORM\DB;
 use SilverStripe\ORM\DataList;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
+use SilverStripe\Core\Injector\Injector;
 
 class RemoveOldCSPViolationsJob extends AbstractQueuedJob
 {
@@ -69,7 +70,8 @@ class RemoveOldCSPViolationsJob extends AbstractQueuedJob
             print 'Removed ' . number_format($this->reportsDeleted) . ' reports.' . "\n";
 
             $deletionJob = new RemoveUnreferencedCSPDocumentJob();
-            $jobId = singleton(QueuedJobService::class)->queueJob($deletionJob);
+            $jobService = Injector::inst()->get(QueuedJobService::class);
+            $jobId = $jobService->queueJob($deletionJob);
 
             print "Unreferenced CSP Document job queued with ID $jobId\n";
 

@@ -3,7 +3,7 @@
 If reporting is enabled, there will inevitably be reports. The CSP violations report 
 enables a user with suitable permissions to manage and remove reports.
 
-However, if reviewing violation reports is intermittent, there are two `dev/task`s
+However, if reviewing violation reports is intermittent, there are two maintenance tasks
 that can be run to remove older reports and remove unreferenced document URIs.
 
 Additionally, the system can be configured to automatically run jobs to remove older reports and
@@ -12,11 +12,15 @@ remove unreferenced document URIs.
 ## Available tasks
 
 The tasks are only available if [symbiote/silverstripe-queuedjobs][] is installed.
-Both tasks simply queue up an appropriate job to run immediately.
+Both tasks simply queue up an appropriate job to run immediately. In Silverstripe CMS 6,
+build tasks expose Symfony Console style commands as well as `/dev/tasks` endpoints,
+so you can either run `sake tasks:<task-name>` or browse to `/dev/tasks/<task-name>` as
+outlined below. See the [CMS 6 CLI changes](https://docs.silverstripe.org/en/6/changelogs/6.0.0/#cli-changes) for
+background on the new command names.
 
 ### Remove old CSP violation reports
 
-`dev/tasks/Signify-Tasks-RemoveOldCSPViolationsTask`
+`/dev/tasks/remove-old-csp-violations` (or `sake tasks:remove-old-csp-violations`)
 
 Delete older reports, to keep the number of stored reports manageable. Any report that
 has not been modified within the retention period will be deleted.
@@ -34,7 +38,7 @@ CSP Document  URIs will be queued.
 
 ### Remove unreferenced CSP Document URIs
 
-`dev/tasks/Signify-Tasks-RemoveUnreferencedCSPDocumentsTask`
+`/dev/tasks/remove-unreferenced-csp-documents` (or `sake tasks:remove-unreferenced-csp-documents`)
 
 Remove all CSP Document URIs (`CSPDocument`) that does not have any linked violation
 report (`CSPViolation`).

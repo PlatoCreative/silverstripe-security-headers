@@ -3,30 +3,39 @@
 namespace Signify\Tasks;
 
 use Signify\Jobs\RemoveUnreferencedCSPDocumentJob;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\BuildTask;
+use SilverStripe\PolyExecution\PolyOutput;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 
 class RemoveUnreferencedCSPDocumentsTask extends BuildTask
 {
-    protected $title = 'Remove unreferenced CSP Document URIs';
+    protected static string $commandName = 'remove-unreferenced-csp-documents';
 
-    protected $description =
-    'CSP Document URIs that are not referenced by a CSP violation report can be safely removed.';
+    protected string $title = 'Remove unreferenced CSP Document URIs';
+
+    protected static string $description =
+    'Queue a job to remove CSP Document URIs that are no longer referenced by violation reports.';
 
     /**
      * {@inheritDoc}
-     * @see \SilverStripe\Dev\BuildTask::run()
+     * @see \SilverStripe\Dev\BuildTask::execute()
      */
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
         $deletionJob = new RemoveUnreferencedCSPDocumentJob();
 
-        $jobId = singleton(QueuedJobService::class)->queueJob($deletionJob);
+        $jobService = Injector::inst()->get(QueuedJobService::class);
+        $jobId = $jobService->queueJob($deletionJob);
 
-        print "Job queued with ID $jobId\n";
+        $output->writeln(sprintf('Job queued with ID %s', $jobId ?? 'unknown'));
+
+        return Command::SUCCESS;
     }
 
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return parent::isEnabled() && class_exists(QueuedJobService::class);
     }

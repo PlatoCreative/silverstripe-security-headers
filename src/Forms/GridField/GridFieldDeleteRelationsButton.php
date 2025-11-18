@@ -23,7 +23,7 @@ use SilverStripe\Forms\FormField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\Forms\ReadonlyField;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\View\Requirements;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 
@@ -157,9 +157,9 @@ class GridFieldDeleteRelationsButton implements GridField_HTMLProvider, GridFiel
         $button
         ->addExtraClass('btn btn-outline-danger font-icon-trash btn--icon-large action_import')
         ->setForm($gridField->getForm())
-        ->setAttribute('data-toggle', 'modal')
+        ->setAttribute('data-bs-toggle', 'modal')
         ->setAttribute('aria-controls', $modalID)
-        ->setAttribute('data-target', "#{$modalID}")
+        ->setAttribute('data-bs-target', "#{$modalID}")
         ->setAttribute('data-modal', $modal);
 
         // If form has a message, trigger it to automatically open
@@ -563,4 +563,5 @@ class GridFieldDeleteRelationsButton implements GridField_HTMLProvider, GridFiel
 
         return array_combine(array_map('hex2bin', array_keys($result)), $result);
     }
+
 }

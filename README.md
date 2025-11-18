@@ -11,6 +11,12 @@ Additionally provides a report of Content Security Policy violations.
 
 Comes with a default set of headers configured, but can be used to add any headers you wish (as well as overriding or removing the default headers).
 
+## Requirements
+
+- Silverstripe CMS ^6
+- PHP ^8.3
+- [symbiote/silverstripe-queuedjobs](https://github.com/silverstripe/silverstripe-queuedjobs) for optional cleanup tasks
+
 ## Install
 
 For SilverStripe 3, see the [appropriate branch](https://github.com/signify-nz/silverstripe-security-headers/tree/1)

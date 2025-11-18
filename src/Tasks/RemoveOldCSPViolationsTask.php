@@ -5,31 +5,48 @@ namespace Signify\Tasks;
 use DateInterval;
 use Signify\Jobs\RemoveOldCSPViolationsJob;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\BuildTask;
+use SilverStripe\PolyExecution\PolyOutput;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 
 class RemoveOldCSPViolationsTask extends BuildTask
 {
-    protected $title = 'Remove old CSP violation reports';
+    protected static string $commandName = 'remove-old-csp-violations';
+
+    protected string $title = 'Remove old CSP violation reports';
+
+    protected static string $description = 'Queue a job to delete CSP violation reports older than your configured retention window.';
 
     /**
      * {@inheritDoc}
-     * @see \SilverStripe\Dev\BuildTask::run()
+     * @see \SilverStripe\Dev\BuildTask::execute()
      */
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
         $deletionJob = new RemoveOldCSPViolationsJob();
 
-        $jobId = singleton(QueuedJobService::class)->queueJob($deletionJob);
+        $jobService = Injector::inst()->get(QueuedJobService::class);
+        $jobId = $jobService->queueJob($deletionJob);
 
-        print "Job queued with ID $jobId\n";
+        $output->writeln(sprintf('Job queued with ID %s', $jobId ?? 'unknown'));
+
+        return Command::SUCCESS;
     }
 
-    /**
-     * {@inheritDoc}
-     * @see \SilverStripe\Dev\BuildTask::getDescription()
-     */
-    public function getDescription()
+    public static function getDescription(): string
+    {
+        $base = static::$description;
+        $retention = static::getRetentionSummary();
+        if ($retention) {
+            $base .= " Current retention window: {$retention}.";
+        }
+        return $base;
+    }
+
+    protected static function getRetentionSummary(): ?string
     {
         // Map DateInterval fields to text names. Order is significant.
         static $parts = [
@@ -43,7 +60,15 @@ class RemoveOldCSPViolationsTask extends BuildTask
         ];
 
         $retention = Config::inst()->get(RemoveOldCSPViolationsJob::class, 'retention_period');
-        $retention = new DateInterval($retention);
+        if (!$retention) {
+            return null;
+        }
+
+        try {
+            $retention = new DateInterval($retention);
+        } catch (\Exception $e) {
+            return $retention;
+        }
 
         $duration_parts = [];
         foreach ($parts as $field => $label) {
@@ -66,11 +91,14 @@ class RemoveOldCSPViolationsTask extends BuildTask
             $duration_string = reset($duration_parts);
         }
 
-        return 'CSP reports that have not been created or modified within the last ' .
-            $duration_string . ' will be removed.';
+        if (!$duration_parts) {
+            return null;
+        }
+
+        return $duration_string;
     }
 
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return parent::isEnabled() && class_exists(QueuedJobService::class);
     }
