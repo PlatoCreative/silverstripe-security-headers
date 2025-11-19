@@ -2,7 +2,7 @@
 
 namespace Signify\Forms\GridField;
 
-use Signify\Forms\Validators\GridFieldDeleteRelationsValidator;
+use Signify\Forms\Validation\Validators\GridFieldDeleteRelationsValidator;
 use SilverStripe\Forms\GridField\GridField_HTMLProvider;
 use SilverStripe\Forms\GridField\GridField_URLHandler;
 use SilverStripe\Forms\GridField\GridField;
@@ -10,7 +10,7 @@ use SilverStripe\Forms\GridField\GridField_FormAction;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Security\Security;
-use SilverStripe\View\ArrayData;
+use SilverStripe\Model\ArrayData;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\View\SSViewer;
 use SilverStripe\Forms\FieldList;
